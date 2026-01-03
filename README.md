@@ -2,13 +2,6 @@
 
 A small Bubble Tea-based prompt helper for building interactive CLI flows.
 
-It provides a simple log + modal queue model plus helpers for common prompts:
-
-- Confirmation, input, and select modals.
-- A persistent message box for chat-style input with suggestions.
-- A status modal with idle/working/progress states.
-- Optional history limits and custom view rendering.
-
 ## Install
 
 ```bash
