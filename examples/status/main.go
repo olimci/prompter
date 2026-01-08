@@ -11,7 +11,7 @@ import (
 func main() {
 	ctx := context.Background()
 
-	err := prompter.Start(func(p *prompter.Prompter) error {
+	err := prompter.Start(func(ctx context.Context, p *prompter.Prompter) error {
 		p.Log("Status modal demo")
 
 		status, err := p.Status("Booting up")

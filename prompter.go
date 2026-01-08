@@ -16,7 +16,7 @@ func newPrompter(o *options) *Prompter {
 		o.styles = DefaultStyles()
 	}
 	return &Prompter{
-		Ctx:     ctx,
+		ctx:     ctx,
 		cancel:  cancel,
 		styles:  o.styles,
 		program: tea.NewProgram(newModel(o), tea.WithContext(ctx)),
@@ -24,7 +24,7 @@ func newPrompter(o *options) *Prompter {
 }
 
 type Prompter struct {
-	Ctx     context.Context
+	ctx     context.Context
 	cancel  context.CancelCauseFunc
 	program *tea.Program
 	styles  *Styles
@@ -32,8 +32,8 @@ type Prompter struct {
 
 func (p *Prompter) send(msg tea.Msg) error {
 	select {
-	case <-p.Ctx.Done():
-		return p.Ctx.Err()
+	case <-p.ctx.Done():
+		return p.ctx.Err()
 	default:
 	}
 
@@ -63,7 +63,7 @@ func (p *Prompter) AwaitConfirm(prompt string) (bool, error) {
 	if err := p.send(msgModal{newConfirmModal(prompt, true, res, p.styles)}); err != nil {
 		return false, err
 	}
-	return pro.Await(p.Ctx)
+	return pro.Await(p.ctx)
 }
 
 func (p *Prompter) Input(opts ...InputOption) (promise.Promise[string], error) {
@@ -82,7 +82,7 @@ func (p *Prompter) AwaitInput(opts ...InputOption) (string, error) {
 	if err := p.send(msgModal{newInputModal(options, res, p.styles)}); err != nil {
 		return "", err
 	}
-	return pro.Await(p.Ctx)
+	return pro.Await(p.ctx)
 }
 
 func (p *Prompter) Select(prompt string, options []string) (promise.Promise[string], error) {
@@ -104,7 +104,7 @@ func (p *Prompter) AwaitSelect(prompt string, options []string) (string, error) 
 	if err := p.send(msgModal{newSelectModal(prompt, options, 0, res, p.styles)}); err != nil {
 		return "", err
 	}
-	return pro.Await(p.Ctx)
+	return pro.Await(p.ctx)
 }
 
 func (p *Prompter) SelectDefault(prompt string, options []string, defaultValue string) (promise.Promise[string], error) {
@@ -136,10 +136,10 @@ func (p *Prompter) AwaitSelectDefault(prompt string, options []string, defaultVa
 	if err := p.send(msgModal{newSelectModal(prompt, options, index, res, p.styles)}); err != nil {
 		return "", err
 	}
-	return pro.Await(p.Ctx)
+	return pro.Await(p.ctx)
 }
 
-func Start(f func(p *Prompter) error, opts ...Option) error {
+func Start(f func(ctx context.Context, p *Prompter) error, opts ...Option) error {
 	o := defaultOptions().apply(opts...)
 	p := newPrompter(o)
 	defer func() {
@@ -155,9 +155,9 @@ func Start(f func(p *Prompter) error, opts ...Option) error {
 		}
 	}()
 
-	if err := f(p); err != nil {
+	if err := f(p.ctx, p); err != nil {
 		if errors.Is(err, context.Canceled) {
-			if err := context.Cause(p.Ctx); errors.Is(err, context.Canceled) {
+			if err := context.Cause(p.ctx); errors.Is(err, context.Canceled) {
 				return nil
 			}
 		}

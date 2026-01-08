@@ -53,7 +53,7 @@ func boxedView(maxLines int) func(history []string, modal string) string {
 func main() {
 	ctx := context.Background()
 
-	err := prompter.Start(func(p *prompter.Prompter) error {
+	err := prompter.Start(func(ctx context.Context, p *prompter.Prompter) error {
 		p.Log("Message box demo (type /done to exit)")
 
 		box, err := p.MessageBox(

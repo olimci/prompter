@@ -61,7 +61,7 @@ func cvvValidator(s string) error {
 func main() {
 	ctx := context.Background()
 
-	err := prompter.Start(func(p *prompter.Prompter) error {
+	err := prompter.Start(func(ctx context.Context, p *prompter.Prompter) error {
 		p.Log("Credit Card Form")
 
 		cardType, err := p.AwaitSelectDefault("Card type:", []string{"Visa", "Mastercard", "Amex"}, "Amex")
@@ -94,17 +94,17 @@ func main() {
 			return err
 		}
 
-		ccn, err := ccnPro.Await(p.Ctx)
+		ccn, err := ccnPro.Await(ctx)
 		if err != nil {
 			return err
 		}
 
-		exp, err := expPro.Await(p.Ctx)
+		exp, err := expPro.Await(ctx)
 		if err != nil {
 			return err
 		}
 
-		cvv, err := cvvPro.Await(p.Ctx)
+		cvv, err := cvvPro.Await(ctx)
 		if err != nil {
 			return err
 		}
