@@ -15,11 +15,14 @@ const (
 	statusIdle statusState = iota
 	statusWorking
 	statusProgress
+	statusSuccess
+	statusError
 )
 
 const (
-	statusIdleIcon  = "[]"
-	statusFinalIcon = "ok"
+	statusIdleIcon    = "○"
+	statusSuccessIcon = "✓"
+	statusErrorIcon   = "✗"
 )
 
 type msgStatusIdle struct {
@@ -48,21 +51,30 @@ type msgStatusMessage struct {
 	message string
 }
 
+type msgStatusSuccess struct {
+	modal   *statusModal
+	message string
+}
+
+type msgStatusError struct {
+	modal   *statusModal
+	message string
+}
+
 type msgStatusClear struct {
 	modal *statusModal
 }
 
 func newStatusModal(state statusState, message string, styles *Styles) *statusModal {
 	spin := spinner.New()
-	spin.Spinner = spinner.Line
+	spin.Spinner = spinner.Pulse
 	spin.Style = styles.Status.Spinner
 
 	bar := progress.New(
 		progress.WithWidth(32),
-		progress.WithFillCharacters('#', '-'),
+		progress.WithDefaultGradient(),
+		progress.WithFillCharacters('█', '░'),
 	)
-	bar.FullColor = "#5FD75F"
-	bar.EmptyColor = "#444444"
 	bar.PercentageStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
 
 	return &statusModal{
@@ -131,6 +143,20 @@ func (m *statusModal) Update(msg tea.Msg) (modal, tea.Cmd, string) {
 		}
 		m.message = msg.message
 		return m, nil, ""
+	case msgStatusSuccess:
+		if msg.modal != m {
+			return m, nil, ""
+		}
+		m.state = statusSuccess
+		m.message = msg.message
+		return m, nil, ""
+	case msgStatusError:
+		if msg.modal != m {
+			return m, nil, ""
+		}
+		m.state = statusError
+		m.message = msg.message
+		return m, nil, ""
 	case msgStatusClear:
 		if msg.modal != m {
 			return m, nil, ""
@@ -158,7 +184,7 @@ func (m *statusModal) Update(msg tea.Msg) (modal, tea.Cmd, string) {
 
 func (m *statusModal) View() string {
 	indicator := m.indicator()
-	message := m.styles.Status.Message.Render(m.message)
+	message := m.messageView()
 	if m.message == "" {
 		return indicator
 	}
@@ -171,11 +197,31 @@ func (m *statusModal) indicator() string {
 		return m.spinner.View()
 	case statusProgress:
 		return m.progressBar.View()
+	case statusSuccess:
+		return m.styles.Status.FinalIcon.Render(statusSuccessIcon)
+	case statusError:
+		return m.styles.Status.ErrorIcon.Render(statusErrorIcon)
 	default:
 		return m.styles.Status.IdleIcon.Render(statusIdleIcon)
 	}
 }
 
 func (m *statusModal) final() string {
-	return ""
+	switch m.state {
+	case statusSuccess, statusError:
+		return m.View()
+	default:
+		return ""
+	}
+}
+
+func (m *statusModal) messageView() string {
+	switch m.state {
+	case statusSuccess:
+		return m.styles.Status.FinalMessage.Render(m.message)
+	case statusError:
+		return m.styles.Status.ErrorMessage.Render(m.message)
+	default:
+		return m.styles.Status.Message.Render(m.message)
+	}
 }

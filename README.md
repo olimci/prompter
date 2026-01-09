@@ -49,4 +49,5 @@ Run any of the examples:
 go run ./examples/credit-card
 go run ./examples/message-box
 go run ./examples/status
+go run ./examples/keybinds
 ```

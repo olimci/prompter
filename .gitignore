@@ -53,6 +53,9 @@ pids
 tmp/
 temp/
 .tmp/
+.gocache/
+.gomodcache/
+.gopath/
 
 # Backup files
 *.bak

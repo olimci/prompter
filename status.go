@@ -33,6 +33,14 @@ func (h *StatusHandle) Message(message string) error {
 	return h.prompter.send(msgStatusMessage{modal: h.modal, message: message})
 }
 
+func (h *StatusHandle) Success(message string) error {
+	return h.prompter.send(msgStatusSuccess{modal: h.modal, message: message})
+}
+
+func (h *StatusHandle) Error(message string) error {
+	return h.prompter.send(msgStatusError{modal: h.modal, message: message})
+}
+
 func (h *StatusHandle) Clear() error {
 	return h.prompter.send(msgStatusClear{modal: h.modal})
 }

@@ -41,11 +41,14 @@ func main() {
 		}
 		time.Sleep(300 * time.Millisecond)
 
+		if err := status.Success("Done"); err != nil {
+			return err
+		}
+		time.Sleep(250 * time.Millisecond)
+
 		if err := status.Clear(); err != nil {
 			return err
 		}
-
-		p.Log("Done")
 		return nil
 	},
 		prompter.WithContext(ctx),
