@@ -50,6 +50,10 @@ func (p *Prompter) Logf(format string, args ...any) {
 	p.send(msgLog{message: fmt.Sprintf(format, args...)})
 }
 
+func (p *Prompter) Clear() {
+	p.send(msgClearHistory{})
+}
+
 func (p *Prompter) Confirm(prompt string) (promise.Promise[bool], error) {
 	pro, res := promise.New[bool]()
 	if err := p.send(msgModal{newConfirmModal(prompt, true, res, p.styles)}); err != nil {

@@ -14,6 +14,8 @@ type msgModal struct {
 	modal modal
 }
 
+type msgClearHistory struct{}
+
 func newModel(o *options) *model {
 	history := make([]string, 0)
 	if o.maxHistoryLen > 0 {
@@ -61,6 +63,10 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		} else {
 			m.modalQueue = append(m.modalQueue, msg)
 		}
+
+	case msgClearHistory:
+		m.clearHistory()
+		return m, nil
 	}
 
 	if m.modal != nil {
@@ -112,4 +118,8 @@ func (m *model) appendHistory(line string) {
 	if m.maxHistoryLen > 0 && len(m.history) > m.maxHistoryLen {
 		m.history = m.history[len(m.history)-m.maxHistoryLen:]
 	}
+}
+
+func (m *model) clearHistory() {
+	m.history = m.history[:0]
 }

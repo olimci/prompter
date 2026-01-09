@@ -72,7 +72,6 @@ func newStatusModal(state statusState, message string, styles *Styles) *statusMo
 
 	bar := progress.New(
 		progress.WithWidth(32),
-		progress.WithDefaultGradient(),
 		progress.WithFillCharacters('█', '░'),
 	)
 	bar.PercentageStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
