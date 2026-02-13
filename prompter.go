@@ -2,7 +2,6 @@ package prompter
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"slices"
 
@@ -33,7 +32,7 @@ type Prompter struct {
 func (p *Prompter) send(msg tea.Msg) error {
 	select {
 	case <-p.ctx.Done():
-		return p.ctx.Err()
+		return contextErr(p.ctx)
 	default:
 	}
 
@@ -153,19 +152,11 @@ func Start(f func(ctx context.Context, p *Prompter) error, opts ...Option) error
 
 	go func() {
 		if _, err := p.program.Run(); err != nil {
-			p.cancel(err)
+			p.cancel(normalizeProgramError(err))
 		} else {
 			p.cancel(nil)
 		}
 	}()
 
-	if err := f(p.ctx, p); err != nil {
-		if errors.Is(err, context.Canceled) {
-			if err := context.Cause(p.ctx); errors.Is(err, context.Canceled) {
-				return nil
-			}
-		}
-		return err
-	}
-	return nil
+	return resolveStartError(p.ctx, f(p.ctx, p))
 }
