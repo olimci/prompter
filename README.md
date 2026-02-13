@@ -20,24 +20,25 @@ import (
 )
 
 func main() {
-	_ = prompter.Start(func(p *prompter.Prompter) error {
+	ctx := context.Background()
+
+	err := prompter.Start(func(ctx context.Context, p *prompter.Prompter) error {
 		p.Log("Hello")
 
-		namePro, err := p.Input(
+		name, err := p.AwaitInput(
 			prompter.WithInputPrompt("Name: "),
 		)
 		if err != nil {
 			return err
 		}
 
-		name, err := namePro.Await(p.Ctx)
-		if err != nil {
-			return err
-		}
-
 		p.Logf("Hi %s", name)
 		return nil
-	}, prompter.WithContext(context.Background()))
+	}, prompter.WithContext(ctx))
+
+	if err != nil {
+		panic(err)
+	}
 }
 ```
 
@@ -51,4 +52,5 @@ go run ./examples/message-box
 go run ./examples/status
 go run ./examples/keybinds
 go run ./examples/status-keybinds
+go run ./examples/noninteractive
 ```
